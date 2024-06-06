@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
     });
 
     const savedBooking = await newBooking.save();
-    await bikes.update({ status: "reserved" });
+    await bookedBikes.update({ status: "reserved" });
     console.log(req.body, newBooking);
     return res.json({ data: { result: true, booking: savedBooking.populate("bikes") } });
 });
