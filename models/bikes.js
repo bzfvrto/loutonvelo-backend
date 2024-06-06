@@ -29,7 +29,7 @@ const BikeSchema = mongoose.Schema(
         },
         availability: {
             type: String,
-            enum: ["available", "unavailable", "under_reparation"],
+            enum: ["available", "unavailable", "reserved", "under_reparation"],
         },
         pictures: {
             type: [PictureSchema],
