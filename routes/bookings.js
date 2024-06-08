@@ -20,9 +20,17 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-    const { bikes, startAt, endAt, user } = req.body;
+    const { startAt, endAt, user } = req.body;
     // const bookedBikes = await Bike.find({ _id: { $in: bikes }, status: "available" });
     console.log(req.body);
+    let bikes = req.body.bikes;
+
+    if (typeof bikes === "string" && bikes.includes(",")) {
+        bikes = bikes.split(",");
+    } else {
+        bikes = [bikes];
+    }
+
     const newBooking = new Booking({
         bikes,
         startAt,
@@ -31,10 +39,7 @@ router.post("/", async (req, res) => {
     });
 
     const savedBooking = await newBooking.save();
-    const bookedBikes = await Bike.updateMany(
-        { _id: { $in: bikes }, status: "available" },
-        { $set: { status: "reserved" } }
-    );
+    const bookedBikes = await Bike.updateMany({ _id: { $in: bikes } }, { $set: { availability: "reserved" } });
     console.log(req.body, newBooking, bookedBikes);
     return res.json({ data: { result: true, booking: savedBooking.populate("bikes") } });
 });
