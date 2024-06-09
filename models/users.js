@@ -4,8 +4,21 @@ const UserSchema = mongoose.Schema(
     {
         username: {
             type: String,
-            required: true,
+            required: false,
             unique: true,
+            trim: true,
+            sparse: true,
+        },
+        firstName: {
+            type: String,
+            required: true,
+            unique: false,
+            trim: true,
+        },
+        lastName: {
+            type: String,
+            required: true,
+            unique: false,
             trim: true,
         },
         email: {
@@ -28,7 +41,7 @@ const UserSchema = mongoose.Schema(
             // this = document
             // required: () => this.status !== "pending",
         },
-        type: {
+        role: {
             type: String,
             enum: ["admin", "reseller", "user"],
             default: "user",

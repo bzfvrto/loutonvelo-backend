@@ -14,7 +14,6 @@ router.get("/", async (req, res) => {
             path: "bikes",
             model: Bike,
         });
-    // .populate({ path: "user", select: "username", select: "email" });
     console.log(bookings);
     return res.json({ result: true, bookings });
 });
