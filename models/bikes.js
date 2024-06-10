@@ -60,6 +60,15 @@ const BikeSchema = mongoose.Schema(
             type: Number,
             required: true,
         },
+        size: {
+            type: String,
+            required: true,
+        },
+        shop: {
+            type: mongoose.Schema.Types.ObjectId,
+            refs: "shops",
+            required: true,
+        },
     },
     { timestamps: true }
 );

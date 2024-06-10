@@ -8,7 +8,7 @@ router.get("/", async (req, res) => {
 });
 
 router.post("/", (req, res) => {
-    const { name, description, website } = req.body;
+    const { name, description, website, shop } = req.body;
     console.log(req.body);
     Brand.find({ name: name }).then((brands) => {
         if (brands.length > 0) {
@@ -18,6 +18,7 @@ router.post("/", (req, res) => {
             name: name,
             description: description,
             website: website,
+            shop: shop,
         });
 
         newBrand.save().then((brand) => {

@@ -17,6 +17,11 @@ const BrandSchema = mongoose.Schema(
             type: String,
             required: false,
         },
+        shop: {
+            type: mongoose.Schema.Types.ObjectId,
+            refs: "shops",
+            required: true,
+        },
     },
     {
         timestamps: true,

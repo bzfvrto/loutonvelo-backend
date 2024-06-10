@@ -19,6 +19,11 @@ const BookingSchema = mongoose.Schema({
         type: Date,
         required: true,
     },
+    shop: {
+        type: mongoose.Schema.Types.ObjectId,
+        refs: "shops",
+        required: true,
+    },
     status: {
         type: String,
         required: true,

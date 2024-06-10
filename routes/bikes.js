@@ -34,7 +34,20 @@ router.get("/available", async (req, res) => {
 });
 
 router.post("/", upload.array("pictures"), async (req, res) => {
-    const { brandId, name, model, seats, availability, year, color, description, floorPrice, pricePerHour } = req.body;
+    const {
+        brandId,
+        name,
+        model,
+        seats,
+        availability,
+        year,
+        color,
+        description,
+        floorPrice,
+        pricePerHour,
+        size,
+        shop,
+    } = req.body;
     console.log(req.body, req.files);
     const brand = await Brand.findById(brandId);
 
@@ -54,6 +67,8 @@ router.post("/", upload.array("pictures"), async (req, res) => {
         description,
         floorPrice,
         pricePerHour,
+        size,
+        shop,
         pictures: pictures.map((picture) => {
             return {
                 url: picture.secure_url,
