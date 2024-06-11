@@ -8,6 +8,7 @@ const upload = multer({ dest: "./tmp/" });
 const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const Booking = require("../models/bookings");
+const Shop = require("../models/shops");
 
 router.get("/", async (req, res) => {
     const bikes = await Bike.find();
@@ -15,7 +16,14 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/available", async (req, res) => {
-    const { from, to } = req.query;
+    const { from, to, city } = req.query;
+    let regex = new RegExp(`^${city}$`, "i");
+    const availableShops = await Shop.find({ "address.city": { $regex: regex } });
+    console.log(
+        `availableShops for ${city}`,
+        availableShops,
+        availableShops.map((item) => item.id)
+    );
     const bookingsForPeriod = await Booking.find({
         $or: [
             { $and: [{ startAt: { $gte: new Date(from) } }, { startAt: { $lte: new Date(to) } }] },
@@ -23,9 +31,15 @@ router.get("/available", async (req, res) => {
             { $and: [{ startAt: { $gte: new Date(from) } }, { endAt: { $lte: new Date(to) } }] },
             { $and: [{ startAt: { $lte: new Date(from) } }, { endAt: { $gte: new Date(to) } }] },
         ],
+        $whereIn: { shop: availableShops.map((item) => item.id) },
     }).select("bikes");
+    const availableShopKey = availableShops.map((item) => item.id);
+    console.log("bookingsForPeriod", bookingsForPeriod, "availableShopKey", availableShopKey);
     const bookedBikes = bookingsForPeriod.map((bookedBikes) => bookedBikes.bikes).flat(1);
-    const bikes = await Bike.find({ _id: { $not: { $in: bookedBikes } } });
+    const bikes = await Bike.find({
+        _id: { $not: { $in: bookedBikes } },
+        shop: { $in: availableShopKey },
+    });
     if (bikes.length === 0) {
         return res.json({ errors: { message: "No bikes availables" } });
     }

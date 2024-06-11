@@ -17,6 +17,18 @@ router.post("/for-owner", async (req, res) => {
 
     return res.json({ data: { result: true, shops: shops } });
 });
+
+router.get("/city/:city", async (req, res) => {
+    const { city } = req.params;
+    const shops = await Shop.find({ "address.city": { $regex: new RegExp(`^${city}$`, "ig") } });
+
+    if (!shops.length) {
+        return res.json({ result: false, errors: [{ message: "No shop found" }] });
+    }
+
+    return res.json({ data: { result: true, shops: shops } });
+});
+
 router.post("/", async (req, res) => {
     const { name, description, website, street, postcode, city, country, user } = req.body;
 
