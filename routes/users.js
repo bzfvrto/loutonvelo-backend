@@ -2,6 +2,8 @@ var express = require("express");
 const User = require("../models/users");
 var router = express.Router();
 const bcrypt = require("bcrypt");
+const { generateAccessToken } = require("../modules/generateToken");
+const Shop = require("../models/shops");
 
 /* GET users listing. */
 router.get("/", function (req, res, next) {
@@ -17,25 +19,41 @@ router.post("/login", async (req, res) => {
         .select("role")
         .select("firstName")
         .select("lastName");
-    console.log("user", user);
+
     if (!user || !bcrypt.compareSync(password, user.password)) {
         return res.sendStatus(401);
     }
+
+    const userPayload = { email: user.email, _id: user._id };
+
+    if (user.role === "reseller") {
+        const shop = await Shop.findOne({ user: user._id });
+        userPayload.shop = shop._id;
+    }
+    console.log("userPayload", userPayload);
+
+    user.token = generateAccessToken({ user: userPayload });
+
     user.username = `${user.firstName} ${user.lastName}`;
+    console.log("user", user);
     return res.json({ data: { result: true, user: user } });
 });
 
 router.post("/register", async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
     const user = await User.findOne({ email: email });
+
     if (user) {
         return res.sendStatus(409);
     }
+
+    const accessToken = generateAccessToken({ email });
 
     const newUser = new User({
         firstName,
         lastName,
         email,
+        token: accessToken,
         password: bcrypt.hashSync(password, 10),
     });
 

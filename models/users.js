@@ -47,6 +47,10 @@ const UserSchema = mongoose.Schema(
             default: "user",
             required: true,
         },
+        token: {
+            type: String,
+            required: true,
+        },
     },
     {
         timestamps: true,
