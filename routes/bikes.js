@@ -47,7 +47,7 @@ router.get("/available", async (req, res) => {
     return res.json({ data: { result: true, bikes: bikes } });
 });
 
-router.post("/", upload.array("pictures"), async (req, res) => {
+router.post("/", upload.array("pictures"), async (req, res, next) => {
     const {
         brandId,
         name,
@@ -62,38 +62,43 @@ router.post("/", upload.array("pictures"), async (req, res) => {
         size,
         shop,
     } = req.body;
-    console.log(req.body, req.files);
-    const brand = await Brand.findById(brandId);
+    // console.log(req.body, req.files);
+    try {
+        const brand = await Brand.findById(brandId);
 
-    if (!brand) {
-        return res.status(422).json({ result: false, error: "Brand not found" });
-    }
-    const pictures = await storePicturesInCloudinary(req.files);
+        if (!brand) {
+            // throw new Error("Brand not found")
+            return res.status(422).json({ result: false, error: "Brand not found" });
+        }
+        const pictures = await storePicturesInCloudinary(req.files);
 
-    const newBike = new Bike({
-        name,
-        brand: brandId,
-        model,
-        seats,
-        availability,
-        year,
-        color,
-        description,
-        floorPrice,
-        pricePerHour,
-        size,
-        shop,
-        pictures: pictures.map((picture) => {
-            return {
-                url: picture.secure_url,
-            };
-        }),
-    });
+        const newBike = new Bike({
+            name,
+            brand: brandId,
+            model,
+            seats,
+            availability,
+            year,
+            color,
+            description,
+            floorPrice,
+            pricePerHour,
+            size,
+            shop,
+            pictures: pictures.map((picture) => {
+                return {
+                    url: picture.secure_url,
+                };
+            }),
+        });
 
-    const createdBike = await newBike.save();
+        const createdBike = await newBike.save();
 
-    if (createdBike) {
-        return res.json({ data: { result: true, bike: createdBike } });
+        if (createdBike) {
+            return res.json({ data: { result: true, bike: createdBike } });
+        }
+    } catch (error) {
+        next(error);
     }
 });
 

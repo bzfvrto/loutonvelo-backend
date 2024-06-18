@@ -16,6 +16,7 @@ var usersRouter = require("./routes/users");
 var app = express();
 
 const cors = require("cors");
+const ErrorHandler = require("./routes/middleware/errorHandler");
 app.use(cors());
 
 app.use(logger("dev"));
@@ -30,5 +31,7 @@ app.use("/bikes", bikesRouter);
 app.use("/brands", brandsRouter);
 app.use("/bookings", bookingsRouter);
 app.use("/users", usersRouter);
+
+app.use(ErrorHandler);
 
 module.exports = app;
