@@ -1,9 +1,10 @@
 var express = require("express");
 const Brand = require("../models/brands");
 var router = express.Router();
+const authenticateUser = require("./middleware/authenticateMiddleware");
 
-router.get("/", async (req, res) => {
-    const brands = await Brand.find();
+router.get("/", authenticateUser, async (req, res) => {
+    const brands = await Brand.find({ shop: req.user.user.shop });
     return res.json({ result: true, brands });
 });
 

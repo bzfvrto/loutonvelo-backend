@@ -9,9 +9,11 @@ const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const Booking = require("../models/bookings");
 const Shop = require("../models/shops");
+const authenticateUser = require("./middleware/authenticateMiddleware");
 
-router.get("/", async (req, res) => {
-    const bikes = await Bike.find();
+router.get("/", authenticateUser, async (req, res) => {
+    const bikes = await Bike.find({ shop: req.user.user.shop });
+    console.log(bikes);
     return res.json({ data: { result: true, bikes } });
 });
 

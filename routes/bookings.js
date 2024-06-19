@@ -2,10 +2,16 @@ var express = require("express");
 const Bike = require("../models/bikes");
 const User = require("../models/users");
 const Booking = require("../models/bookings");
+const authenticateUser = require("./middleware/authenticateMiddleware");
 var router = express.Router();
 
-router.get("/", async (req, res) => {
-    const bookings = await Booking.find()
+router.get("/", authenticateUser, async (req, res) => {
+    const { type = "shop" } = req.query;
+    console.log(req.user, type);
+
+    let query = type === "shop" ? { shop: req.user.user.shop } : { user: req.user.user._id };
+    console.log("query", query);
+    const bookings = await Booking.find(query)
         .populate({
             path: "user",
             model: User,
@@ -18,23 +24,24 @@ router.get("/", async (req, res) => {
     return res.json({ result: true, bookings });
 });
 
-router.post("/", async (req, res) => {
-    const { startAt, endAt, user } = req.body;
+router.post("/", authenticateUser, async (req, res) => {
+    const { bikes, shop, startAt, endAt } = req.body;
     // const bookedBikes = await Bike.find({ _id: { $in: bikes }, status: "available" });
-    console.log(req.body);
-    let bikes = req.body.bikes;
+    // let bikes = req.body.bikes;
 
+    let bikesToBook = [];
     if (typeof bikes === "string" && bikes.includes(",")) {
-        bikes = bikes.split(",");
+        bikesToBook = bikes.split(",");
     } else {
-        bikes = [bikes];
+        bikesToBook = [bikes];
     }
 
     const newBooking = new Booking({
-        bikes,
+        bikes: bikesToBook,
+        shop,
         startAt,
         endAt,
-        user,
+        user: req.user.user,
     });
 
     const savedBooking = await newBooking.save();
