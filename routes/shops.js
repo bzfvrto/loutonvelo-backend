@@ -1,7 +1,9 @@
 var express = require("express");
 const Shop = require("../models/shops");
 const User = require("../models/users");
+const Bike = require("../models/bikes");
 var router = express.Router();
+const authenticateUser = require("./middleware/authenticateMiddleware");
 
 router.post("/for-owner", async (req, res) => {
     const { userId } = req.body;
@@ -55,6 +57,12 @@ router.post("/", async (req, res) => {
     await shopOwner.save();
     const shop = await newShop.save();
     res.json({ data: { result: true, shop: shop } });
+});
+
+router.get("/bikes", authenticateUser, async (req, res) => {
+    const bikes = await Bike.find({ shop: req.user.user.shop });
+    console.log(bikes);
+    return res.json({ data: { result: true, bikes } });
 });
 
 module.exports = router;

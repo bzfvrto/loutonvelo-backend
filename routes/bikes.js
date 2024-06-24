@@ -11,8 +11,17 @@ const Booking = require("../models/bookings");
 const Shop = require("../models/shops");
 const authenticateUser = require("./middleware/authenticateMiddleware");
 
-router.get("/", authenticateUser, async (req, res) => {
-    const bikes = await Bike.find({ shop: req.user.user.shop });
+router.get("/", async (req, res) => {
+    const bikes = await Bike.find()
+        .populate({
+            path: "shop",
+            model: Shop,
+        })
+        .populate({
+            path: "brand",
+            model: Brand,
+        })
+        .exec();
     console.log(bikes);
     return res.json({ data: { result: true, bikes } });
 });
