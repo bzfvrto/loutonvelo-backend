@@ -4,6 +4,7 @@ var router = express.Router();
 const bcrypt = require("bcrypt");
 const { generateAccessToken } = require("../modules/generateToken");
 const Shop = require("../models/shops");
+const authenticateUser = require("./middleware/authenticateMiddleware");
 
 /* GET users listing. */
 router.get("/", function (req, res, next) {
@@ -28,7 +29,7 @@ router.post("/login", async (req, res) => {
 
     if (user.role === "reseller") {
         const shop = await Shop.findOne({ user: user._id });
-        userPayload.shop = shop._id;
+        userPayload.shop = shop?._id;
     }
     console.log("userPayload", userPayload);
 
@@ -44,7 +45,7 @@ router.post("/register", async (req, res) => {
     const user = await User.findOne({ email: email });
 
     if (user) {
-        return res.sendStatus(409);
+        return res.status(409).json({ result: false, errors: [{ message: "Users already exist" }] });
     }
 
     const accessToken = generateAccessToken({ email });
@@ -62,11 +63,11 @@ router.post("/register", async (req, res) => {
     return res.json({ data: { result: true, user: createdUser } });
 });
 
-router.put("/update-account", async (req, res) => {
-    const { userId } = req.body;
-    console.log(userId);
-    const updatedUser = await User.findOneAndUpdate({ _id: userId }, { role: "reseller" });
-    console.log(updatedUser);
+router.put("/update-reseller-account", authenticateUser, async (req, res) => {
+    const { isActive } = req.body;
+    // console.log(isActive, req.user);
+    const updatedUser = await User.findByIdAndUpdate(req.user.user._id, { role: isActive ? "reseller" : "user" });
+    // console.log("updatedUser", updatedUser);
     return res.json({ data: { result: true, user: updatedUser } });
 });
 
