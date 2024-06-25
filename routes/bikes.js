@@ -12,7 +12,13 @@ const Shop = require("../models/shops");
 const authenticateUser = require("./middleware/authenticateMiddleware");
 
 router.get("/", async (req, res) => {
-    const bikes = await Bike.find()
+    const { limit } = req.query;
+    console.log(limit);
+    let query = Bike.find().sort({ createdAt: -1 });
+    if (limit) {
+        query.limit(Number(limit));
+    }
+    const bikes = await query
         .populate({
             path: "shop",
             model: Shop,
@@ -58,7 +64,7 @@ router.get("/available", async (req, res) => {
     return res.json({ data: { result: true, bikes: bikes } });
 });
 
-router.post("/", upload.array("pictures"), async (req, res, next) => {
+router.post("/", [upload.array("pictures"), authenticateUser], async (req, res, next) => {
     const {
         brandId,
         name,
@@ -119,5 +125,32 @@ const storePicturesInCloudinary = async (pictures) => {
     );
     return result;
 };
+
+router.get("/:id", async (req, res) => {
+    const id = req.params.id;
+    console.log("id id id ", id);
+    // res.end();
+    const bike = await Bike.findById(id);
+    console.log("getting bike", bike);
+    return res.json({ data: { result: true, bike } });
+});
+
+router.patch("/:id", authenticateUser, async (req, res) => {
+    const id = req.params.id;
+    // res.end();
+    console.log(`finding & updating bike ${id}`, req.body);
+    const bike = await Bike.findByIdAndUpdate(id, { ...req.body });
+    // .populate({
+    //     path: "shop",
+    //     model: Shop,
+    // })
+    // .populate({
+    //     path: "brand",
+    //     model: Brand,
+    // })
+    // .exec();
+    console.log("getting bike", bike);
+    return res.json({ data: { result: true, bike } });
+});
 
 module.exports = router;

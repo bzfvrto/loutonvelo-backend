@@ -9,7 +9,11 @@ router.get("/", authenticateUser, async (req, res) => {
     const { type = "shop" } = req.query;
     console.log(req.user, type);
 
-    let query = type === "shop" ? { shop: req.user.user.shop } : { user: req.user.user._id };
+    if (type === "shop" && !req.user.user.shop) {
+        return res.json({ result: true, bookings: [] });
+    }
+
+    let query = type === "shop" && req.user.user.shop ? { shop: req.user.user.shop } : { user: req.user.user._id };
     console.log("query", query);
     const bookings = await Booking.find(query)
         .populate({
@@ -45,8 +49,9 @@ router.post("/", authenticateUser, async (req, res) => {
     });
 
     const savedBooking = await newBooking.save();
-    const bookedBikes = await Bike.updateMany({ _id: { $in: bikes } }, { $set: { availability: "reserved" } });
-    console.log(req.body, newBooking, bookedBikes);
+    // Bike is reserved for duration not globally
+    // const bookedBikes = await Bike.updateMany({ _id: { $in: bikes } }, { $set: { availability: "reserved" } });
+    console.log(req.body, newBooking);
     return res.json({ data: { result: true, booking: savedBooking.populate("bikes") } });
 });
 

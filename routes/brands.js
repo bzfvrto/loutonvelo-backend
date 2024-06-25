@@ -8,7 +8,7 @@ router.get("/", authenticateUser, async (req, res) => {
     return res.json({ result: true, brands });
 });
 
-router.post("/", (req, res) => {
+router.post("/", authenticateUser, (req, res) => {
     const { name, description, website, shop } = req.body;
     console.log(req.body);
     Brand.find({ name: name }).then((brands) => {
