@@ -16,6 +16,16 @@ const BookingSchema = mongoose.Schema(
             type: Date,
             required: true,
         },
+        startedAt: {
+            type: Date,
+            required: false,
+            default: null,
+        },
+        finishedAt: {
+            type: Date,
+            required: false,
+            default: null,
+        },
         endAt: {
             type: Date,
             required: true,
@@ -29,7 +39,7 @@ const BookingSchema = mongoose.Schema(
             type: String,
             required: true,
             default: "pending",
-            enum: ["pending", "paid", "due", "conflict", "rejected"],
+            enum: ["pending", "accepted", "started", "finished", "paid", "due", "conflict", "rejected"],
         },
         activationCode: {
             type: String,

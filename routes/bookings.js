@@ -17,6 +17,7 @@ router.get("/", authenticateUser, async (req, res) => {
     let query = type === "shop" && req.user.user.shop ? { shop: req.user.user.shop } : { user: req.user.user._id };
     console.log("query", query);
     const bookings = await Booking.find(query)
+        .sort({ startAt: -1 })
         .populate({
             path: "user",
             model: User,
