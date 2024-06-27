@@ -49,6 +49,7 @@ router.get("/available", async (req, res) => {
             { $and: [{ startAt: { $lte: new Date(from) } }, { endAt: { $gte: new Date(to) } }] },
         ],
         $whereIn: { shop: availableShops.map((item) => item.id) },
+        status: { $or: [{ $ne: "finished" }, { $ne: "conflict" }, { $ne: "rejected" }] },
     }).select("bikes");
     const availableShopKey = availableShops.map((item) => item.id);
     console.log("bookingsForPeriod", bookingsForPeriod, "availableShopKey", availableShopKey);

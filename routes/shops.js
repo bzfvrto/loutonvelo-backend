@@ -66,6 +66,27 @@ router.get("/bikes", authenticateUser, async (req, res) => {
     return res.json({ data: { result: true, bikes } });
 });
 
+router.get("/bookings", authenticateUser, async (req, res) => {
+    const { user } = req.user;
+    if (!user.shop) {
+        return res.status(400).json({ result: false, errors: [{ message: "No shop found for this user" }] });
+    }
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    console.log(now.getFullYear(), now.getMonth(), now.getDate(), today, tomorrow);
+    const bookingsForToday = await Booking.find({
+        shop: user.shop,
+        startAt: { $gte: today, $lt: tomorrow },
+    })
+        .sort({ status: -1 })
+        .sort({ startAt: 1 })
+        .populate({ path: "user", model: User, select: "email firstName lastName" })
+        .populate({ path: "bikes", model: Bike, select: "floorPrice pricePerHour" });
+    console.log("bookingsForToday", bookingsForToday);
+    return res.json({ result: true, data: { bookings: bookingsForToday } });
+});
+
 router.get("/bookings/:id", authenticateUser, async (req, res) => {
     const booking = await Booking.findById(req.params.id)
         .populate({ path: "user", model: User, select: "id email firstName lastName" })
